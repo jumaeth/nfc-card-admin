@@ -7,13 +7,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, ExternalLink, Eye, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import type { CustomerDetail, PageDetail } from "@/lib/types";
-import type { PageContent, PageTheme } from "@/lib/page-content";
+import type { LocalizedText, PageContent, PageTheme } from "@/lib/page-content";
 import { APP_URL, CARD_TYPE_LABEL } from "@/lib/format";
 import { Badge, Button, Card, Input, Spinner } from "@/components/ui";
 import { ErrorNote } from "@/components/bits";
 import { ConfirmDialog } from "@/components/modal";
-import { PageContentEditor, seedContent } from "@/components/builders/PageContentEditor";
-import { PagePreview } from "@/components/builders/PagePreview";
+import { seedContent } from "@/components/builders/PageContentEditor";
+import { PageWorkspace } from "@/components/builders/PageWorkspace";
+import type { BuilderServices, DesignTemplate } from "@/components/builders/host";
 import { useCustomerInvalidation } from "@/components/customer/shared";
 
 export default function CustomerPageEditor({
@@ -76,6 +77,37 @@ export default function CustomerPageEditor({
       invalidateCustomer();
     },
   });
+
+  // What the shared builders call. The admin routes apply the same access as
+  // saving a page (SALES only their customers, SUPPORT read-only); staff are not
+  // bound by the customer's monthly translation limit.
+  const services = useMemo<BuilderServices>(() => {
+    const base = `/admin/companies/${id}`;
+    return {
+      translate: (text, from, to) =>
+        api
+          .post<{ translations: LocalizedText }>(`${base}/pages/${pageId}/translate`, {
+            text,
+            from,
+            to,
+          })
+          .then((res) => res.translations),
+      uploadImage: (file) =>
+        api.upload<{ url: string }>(`${base}/uploads`, file).then((r) => r.url),
+      templates: {
+        queryKey: ["admin-design-templates", id],
+        list: () => api.get<DesignTemplate[]>(`${base}/design-templates`),
+        create: (templateName, templateTheme) =>
+          api.post<DesignTemplate>(`${base}/design-templates`, {
+            name: templateName,
+            theme: templateTheme,
+          }),
+        update: (templateId, patch) =>
+          api.patch<DesignTemplate>(`${base}/design-templates/${templateId}`, patch),
+        remove: (templateId) => api.delete<void>(`${base}/design-templates/${templateId}`),
+      },
+    };
+  }, [id, pageId]);
 
   const remove = useMutation({
     mutationFn: () => api.delete(`/admin/companies/${id}/pages/${pageId}`),
@@ -199,22 +231,16 @@ export default function CustomerPageEditor({
         </a>
       </Card>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
-        {/* A disabled fieldset turns every builder control read-only. */}
-        <fieldset disabled={!canManage} className="flex min-w-0 flex-col gap-6">
-          <PageContentEditor
-            kind={p.kind}
-            content={content}
-            onContentChange={setContent}
-            theme={theme}
-            onThemeChange={setTheme}
-          />
-        </fieldset>
-
-        <div className="lg:sticky lg:top-6 lg:h-fit">
-          <PagePreview kind={p.kind} content={content} theme={theme} />
-        </div>
-      </div>
+      <PageWorkspace
+        kind={p.kind}
+        name={name || p.name}
+        content={content}
+        onContentChange={setContent}
+        theme={theme}
+        onThemeChange={setTheme}
+        canEdit={canManage}
+        services={services}
+      />
 
       <ConfirmDialog
         open={confirmDelete}

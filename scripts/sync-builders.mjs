@@ -14,11 +14,14 @@ const source = resolve(root, process.env.PANEL_APP_DIR ?? "../nfc-card-app");
 
 const SHARED = [
   "src/lib/page-content.ts",
+  "src/lib/page-theme.ts",
   "src/lib/i18n.ts",
   "src/lib/utils.ts",
   "src/components/ui.tsx",
   "src/components/localized-input.tsx",
   "src/components/builders",
+  // The public page views, so the editor preview is the real page.
+  "src/components/public",
 ];
 
 if (!existsSync(source)) {
@@ -42,7 +45,7 @@ for (const path of SHARED.flatMap(files)) {
   const same = existsSync(to) && readFileSync(from).equals(readFileSync(to));
   if (same) continue;
   drifted.push(path);
-  if (!check) cpSync(from, to);
+  if (!check) cpSync(from, to, { recursive: true });
 }
 
 if (drifted.length === 0) {
