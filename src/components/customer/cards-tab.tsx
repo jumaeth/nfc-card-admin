@@ -6,10 +6,10 @@ import { CreditCard, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import type { CardRow, CardStatus, CardType, CustomerDetail, PageRow } from "@/lib/types";
 import {
-  APP_URL,
   CARD_STATUS_LABEL,
   CARD_STATUS_TONE,
   CARD_TYPE_LABEL,
+  tapUrl,
 } from "@/lib/format";
 import { ConfirmDialog, Modal } from "@/components/modal";
 import { Badge, Button, EmptyState, Field, Input, Select, Spinner } from "@/components/ui";
@@ -17,11 +17,13 @@ import { ErrorNote, Table } from "@/components/bits";
 import { errorMessage, useCustomerInvalidation } from "./shared";
 
 const CARD_TYPES = Object.keys(CARD_TYPE_LABEL) as CardType[];
+const LINK = "__link__";
 
 export function CardsTab({ customer }: { customer: CustomerDetail }) {
   const invalidate = useCustomerInvalidation(customer.id);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<CardRow | null>(null);
+  const [linking, setLinking] = useState<CardRow | null>(null);
   const canManage = customer.canManage;
 
   const cards = useQuery({
@@ -41,11 +43,15 @@ export function CardsTab({ customer }: { customer: CustomerDetail }) {
   });
 
   const setDestination = useMutation({
-    mutationFn: (vars: { cardId: string; pageId: string | null }) =>
+    mutationFn: (vars: { cardId: string; pageId?: string | null; url?: string | null }) =>
       api.put(`/admin/companies/${customer.id}/cards/${vars.cardId}/destination`, {
         pageId: vars.pageId,
+        url: vars.url,
       }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      setLinking(null);
+      invalidate();
+    },
   });
 
   const remove = useMutation({
@@ -93,12 +99,12 @@ export function CardsTab({ customer }: { customer: CustomerDetail }) {
               <td className="px-5 py-3.5">
                 <p className="font-semibold text-ink">{card.name}</p>
                 <a
-                  href={`${APP_URL}/c/${card.slug}`}
+                  href={tapUrl(customer.slug, card.slug)}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-muted hover:text-accent"
                 >
-                  /c/{card.slug}
+                  /c/{customer.slug}/{card.slug}
                   <ExternalLink className="size-3" />
                 </a>
                 {card.location && <p className="text-xs text-muted">{card.location.name}</p>}
@@ -108,14 +114,19 @@ export function CardsTab({ customer }: { customer: CustomerDetail }) {
                 {canManage ? (
                   <Select
                     className="w-48 py-2"
-                    value={card.activePageId ?? ""}
+                    value={card.linkUrl ? LINK : (card.activePageId ?? "")}
                     disabled={setDestination.isPending}
                     onChange={(e) =>
-                      setDestination.mutate({ cardId: card.id, pageId: e.target.value || null })
+                      e.target.value === LINK
+                        ? setLinking(card)
+                        : setDestination.mutate({ cardId: card.id, pageId: e.target.value || null })
                     }
-                    aria-label="Destination page"
+                    aria-label="Destination"
                   >
                     <option value="">No destination</option>
+                    <option value={LINK}>
+                      {card.linkUrl ? `Link: ${card.linkUrl}` : "Custom link…"}
+                    </option>
                     {(pages.data ?? []).map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name}
@@ -125,6 +136,8 @@ export function CardsTab({ customer }: { customer: CustomerDetail }) {
                   </Select>
                 ) : card.activePage ? (
                   <span className="text-ink-soft">{card.activePage.name}</span>
+                ) : card.linkUrl ? (
+                  <span className="break-all text-ink-soft">{card.linkUrl}</span>
                 ) : (
                   <span className="text-muted">None</span>
                 )}
@@ -178,15 +191,73 @@ export function CardsTab({ customer }: { customer: CustomerDetail }) {
         />
       )}
 
+      {linking && (
+        <LinkModal
+          card={linking}
+          saving={setDestination.isPending}
+          error={setDestination.error}
+          onClose={() => setLinking(null)}
+          onSave={(url) => setDestination.mutate({ cardId: linking.id, url })}
+        />
+      )}
+
       <ConfirmDialog
         open={!!deleting}
         onClose={() => setDeleting(null)}
         onConfirm={() => deleting && remove.mutate(deleting.id)}
         loading={remove.isPending}
         title="Delete card"
-        description={`Delete ${deleting?.name}? Taps on /c/${deleting?.slug} will stop working. Tap history is kept.`}
+        description={`Delete ${deleting?.name}? Taps on /c/${customer.slug}/${deleting?.slug} will stop working. Tap history is kept.`}
       />
     </div>
+  );
+}
+
+/** Custom link instead of a page: taps are counted, then sent straight there. */
+function LinkModal({
+  card,
+  saving,
+  error,
+  onClose,
+  onSave,
+}: {
+  card: CardRow;
+  saving: boolean;
+  error: Error | null;
+  onClose: () => void;
+  onSave: (url: string) => void;
+}) {
+  const [url, setUrl] = useState(card.linkUrl ?? "");
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={`Custom link for ${card.name}`}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button loading={saving} disabled={!url.trim()} onClick={() => onSave(url.trim())}>
+            Save link
+          </Button>
+        </>
+      }
+    >
+      <Field
+        label="Link"
+        hint="Any web address, or tel:, mailto: or sms:. Taps are still counted."
+      >
+        <Input
+          type="url"
+          autoFocus
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://instagram.com/their-restaurant"
+        />
+      </Field>
+      {error && <p className="mt-3 text-sm text-negative">{errorMessage(error, "Could not save the link.")}</p>}
+    </Modal>
   );
 }
 
@@ -260,7 +331,10 @@ function CreateCardModal({
             </Select>
           </Field>
         </div>
-        <Field label="Tap slug" hint="Optional. Leave empty to generate one. Printed into the card URL.">
+        <Field
+          label="Card link"
+          hint={`Optional. /c/${customer.slug}/<link>, unique within this customer. Made from the name when empty.`}
+        >
           <Input
             value={slug}
             onChange={(e) => setSlug(e.target.value.toLowerCase())}

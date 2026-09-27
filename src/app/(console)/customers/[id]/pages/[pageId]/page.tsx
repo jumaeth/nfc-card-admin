@@ -14,7 +14,8 @@ import { ErrorNote } from "@/components/bits";
 import { ConfirmDialog } from "@/components/modal";
 import { seedContent } from "@/components/builders/PageContentEditor";
 import { PageWorkspace } from "@/components/builders/PageWorkspace";
-import type { BuilderServices, DesignTemplate } from "@/components/builders/host";
+import type { BuilderServices, DesignTemplate, PageOption } from "@/components/builders/host";
+import { WifiGuests, type WifiGuest } from "@/components/builders/WifiGuests";
 import { useCustomerInvalidation } from "@/components/customer/shared";
 
 export default function CustomerPageEditor({
@@ -94,6 +95,14 @@ export default function CustomerPageEditor({
           .then((res) => res.translations),
       uploadImage: (file) =>
         api.upload<{ url: string }>(`${base}/uploads`, file).then((r) => r.url),
+      // The customer's other pages, for the link hub's page picker.
+      pages: {
+        queryKey: ["admin-customer-pages", id, "options"],
+        list: () =>
+          api
+            .get<PageOption[]>(`${base}/pages`)
+            .then((all) => all.filter((p) => p.id !== pageId)),
+      },
       templates: {
         queryKey: ["admin-design-templates", id],
         list: () => api.get<DesignTemplate[]>(`${base}/design-templates`),
@@ -241,6 +250,19 @@ export default function CustomerPageEditor({
         canEdit={canManage}
         services={services}
       />
+
+      {p.kind === "WIFI" && (
+        <WifiGuests
+          queryKey={["admin-wifi-guests", id, pageId]}
+          list={() => api.get<WifiGuest[]>(`/admin/companies/${id}/pages/${pageId}/wifi-guests`)}
+          remove={
+            canManage
+              ? (guestId) =>
+                  api.delete(`/admin/companies/${id}/pages/${pageId}/wifi-guests/${guestId}`)
+              : undefined
+          }
+        />
+      )}
 
       <ConfirmDialog
         open={confirmDelete}

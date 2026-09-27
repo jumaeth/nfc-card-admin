@@ -135,7 +135,7 @@ export const ORDER_STATUS_TONE: Record<OrderStatus, Tone> = {
   EXPIRED: "muted",
 };
 
-/** Tap URL encoded on a card's NFC chip. */
-export function tapUrl(slug: string): string {
-  return `${APP_URL}/c/${slug}`;
+/** Tap URL encoded on a card's NFC chip: /c/<company slug>/<card slug>. */
+export function tapUrl(companySlug: string, slug: string): string {
+  return `${APP_URL}/c/${companySlug}/${slug}`;
 }

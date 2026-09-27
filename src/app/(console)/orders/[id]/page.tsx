@@ -313,12 +313,12 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                       <td className="px-5 py-3 font-mono text-xs text-ink">{card.slug}</td>
                       <td className="px-5 py-3">
                         <a
-                          href={tapUrl(card.slug)}
+                          href={tapUrl(o.companySlug ?? "", card.slug)}
                           target="_blank"
                           rel="noreferrer"
                           className="font-mono text-xs break-all text-accent hover:text-accent-ink"
                         >
-                          {tapUrl(card.slug)}
+                          {tapUrl(o.companySlug ?? "", card.slug)}
                         </a>
                       </td>
                     </tr>
@@ -585,7 +585,7 @@ function csvCell(value: string) {
 function downloadCsv(order: AdminOrderDetail) {
   const lines = [
     "slug,tapUrl,name",
-    ...order.cards.map((c) => [c.slug, tapUrl(c.slug), c.name].map(csvCell).join(",")),
+    ...order.cards.map((c) => [c.slug, tapUrl(order.companySlug ?? "", c.slug), c.name].map(csvCell).join(",")),
   ];
   const blob = new Blob([lines.join("\n") + "\n"], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);

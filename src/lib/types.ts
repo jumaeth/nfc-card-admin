@@ -159,6 +159,8 @@ export interface CardRow {
   uid: string | null;
   status: CardStatus;
   activePageId: string | null;
+  /** Custom link instead of a page (web address, tel:, mailto:, sms:). */
+  linkUrl: string | null;
   locationId: string | null;
   createdAt: string;
   activePage: { id: string; name: string; kind: PageKind; slug: string; published: boolean } | null;
@@ -275,6 +277,8 @@ export interface AdminOrder {
   /** Company the order is attached to, null until claimed. */
   companyId: string | null;
   companyNameInApp: string | null;
+  /** Short name in card links (/c/<companySlug>/<card slug>). */
+  companySlug: string | null;
   totalCents: number;
   subtotalCents: number;
   discountCents: number;
