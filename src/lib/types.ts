@@ -127,6 +127,7 @@ export interface Location {
   city: string | null;
   postalCode: string | null;
   country: string;
+  googleReviewUrl: string | null;
 }
 
 export interface CustomerDetail {
@@ -321,6 +322,9 @@ export interface OrderCardDesign {
   headerShape?: "straight" | "wave" | "round" | "scallop";
   showStars?: boolean;
   showQr?: boolean;
+  showGoogle?: boolean;
+  showTapZone?: boolean;
+  logoScale?: number;
   reviewUrl?: string;
   fullName?: string;
   jobTitle?: string;

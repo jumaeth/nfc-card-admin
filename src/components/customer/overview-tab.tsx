@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import { useStaff } from "@/lib/staff";
 import type {
@@ -23,6 +22,7 @@ import { formatChf } from "@/lib/utils";
 import { Badge, Button, Card, Field, Input, Select } from "@/components/ui";
 import { StatTile } from "@/components/bits";
 import { errorMessage, useCustomerInvalidation } from "./shared";
+import { LocationsCard } from "./locations-card";
 
 export function OverviewTab({ customer }: { customer: CustomerDetail }) {
   return (
@@ -315,32 +315,6 @@ function SalesRepCard({ customer }: { customer: CustomerDetail }) {
       ) : (
         <p className="mt-4 text-sm text-muted">Unassigned</p>
       )}
-    </Card>
-  );
-}
-
-function LocationsCard({ customer }: { customer: CustomerDetail }) {
-  return (
-    <Card className="p-0">
-      <h2 className="display px-6 pt-6 text-xl text-ink">Locations</h2>
-      <div className="mt-4 divide-y divide-line border-t border-line">
-        {customer.locations.map((l) => (
-          <div key={l.id} className="flex items-center gap-3 px-6 py-4">
-            <MapPin className="size-4 shrink-0 text-muted" />
-            <div className="min-w-0">
-              <p className="font-semibold text-ink">
-                {l.name}
-                {l.isDefault && <span className="ml-2 text-xs font-medium text-muted">Default</span>}
-              </p>
-              <p className="truncate text-sm text-muted">
-                {[l.address, [l.postalCode, l.city].filter(Boolean).join(" "), l.country]
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
     </Card>
   );
 }

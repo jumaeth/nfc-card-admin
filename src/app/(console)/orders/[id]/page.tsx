@@ -474,6 +474,9 @@ function DesignSummary({ design: d, fileBase }: { design: OrderCardDesign; fileB
           <Spec label="Header edge" value={d.headerShape ? (SHAPE_NAME[d.headerShape] ?? d.headerShape) : undefined} />
           <Spec label="Stars" value={d.showStars === undefined ? undefined : d.showStars ? "Shown" : "Hidden"} />
           <Spec label="Backup QR" value={d.showQr === undefined ? undefined : d.showQr ? "Yes" : "No"} />
+          <Spec label="Google mark" value={d.showGoogle === undefined ? undefined : d.showGoogle ? "Yes" : "No"} />
+          <Spec label="Tap marker" value={d.showTapZone === undefined ? undefined : d.showTapZone ? "Yes" : "No"} />
+          <Spec label="Logo size" value={d.logoScale === undefined ? undefined : `${Math.round(d.logoScale * 100)}%`} />
         </dl>
 
         {colours.length > 0 && (

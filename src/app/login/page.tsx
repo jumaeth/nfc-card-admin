@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { KeyRound } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { Button, Card, Field, Input } from "@/components/ui";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/utils";
@@ -67,6 +67,10 @@ function DevAccounts({
 export default function LoginPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  // Subscribing keeps better-auth's session store live on this page, and
+  // refetching it after sign-in means the console layout never reads the stale
+  // signed-out state and bounces straight back here.
+  const { refetch: refetchSession } = useSession();
   const [email, setEmail] = useState(DEV_EMAIL);
   const [password, setPassword] = useState(DEV_PASSWORD);
   const [error, setError] = useState<string | null>(null);
@@ -77,11 +81,12 @@ export default function LoginPage() {
     setError(null);
     setLoading("password");
     const { error } = await authClient.signIn.email({ email, password });
-    setLoading(null);
     if (error) {
+      setLoading(null);
       setError(error.message ?? "Could not sign in. Please try again.");
       return;
     }
+    await refetchSession();
     queryClient.clear();
     router.push("/");
   }
@@ -90,11 +95,12 @@ export default function LoginPage() {
     setError(null);
     setLoading("passkey");
     const result = await authClient.signIn.passkey();
-    setLoading(null);
     if (result?.error) {
+      setLoading(null);
       setError(result.error.message ?? "Passkey sign-in was cancelled.");
       return;
     }
+    await refetchSession();
     queryClient.clear();
     router.push("/");
   }
