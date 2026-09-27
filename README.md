@@ -25,10 +25,15 @@ publishing pages. Page content itself is edited by the customer in the app.
 ## Local setup
 
 ```bash
-cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL -> backend
+cp .env.local.example .env.local   # API_URL -> backend
 pnpm install
-pnpm dev                           # http://localhost:3312
+pnpm dev                           # http://admin.localhost:3312
 ```
+
+The console proxies `/api/v1` to the backend, so its session cookie belongs to the
+admin host and stays separate from the customer app's. That only works on a
+different hostname (cookies ignore ports), which is why dev runs on
+`admin.localhost`; plain `localhost:3312` redirects there.
 
 ### Dev logins
 

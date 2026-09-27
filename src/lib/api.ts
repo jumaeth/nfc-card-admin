@@ -1,5 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3311";
-const BASE = `${API_URL}/api/v1`;
+// Same-origin: next.config.ts proxies /api/v1 to the backend, so the session
+// cookie belongs to the admin host and is never shared with the customer app.
+const BASE = "/api/v1";
 
 export class ApiError extends Error {
   constructor(
@@ -14,7 +15,7 @@ export class ApiError extends Error {
 type Query = Record<string, string | number | boolean | undefined | null>;
 
 function buildUrl(path: string, query?: Query): string {
-  const url = new URL(`${BASE}${path}`);
+  const url = new URL(`${BASE}${path}`, window.location.origin);
   if (query) {
     for (const [k, v] of Object.entries(query)) {
       if (v !== undefined && v !== null) url.searchParams.set(k, String(v));

@@ -5,7 +5,7 @@
   only hides what the API would refuse anyway: read `useStaff().capabilities` and
   `customer.canManage`, never re-derive permissions from the role in the client.
 - **Design language** matches the app and marketing site: `bg-paper`, `text-ink`,
-  orange `accent`, `display` headings, `rounded-card`, pill buttons, `eyebrow` labels.
+  blue `accent` (#2f6df0), `display` headings, `rounded-card`, pill buttons, `eyebrow` labels.
   `src/components/ui.tsx`, `modal.tsx` and `page-header.tsx` are copies of the app's;
   keep them in sync when either side changes.
 - **Page builders are copied from the app, never edited here.** `components/builders/*`,

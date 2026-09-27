@@ -22,8 +22,8 @@ export const PLATFORM_ROLE_HINT: Record<PlatformRole, string> = {
   USER: "No console access.",
   SALES: "Manages only the customers assigned to them.",
   SUPPORT: "Sees every customer, cannot change anything.",
-  ADMIN: "Manages every customer, user role and plan.",
-  SUPER_ADMIN: "Like admin, and can grant super admin.",
+  ADMIN: "Manages every customer and user role.",
+  SUPER_ADMIN: "Like admin, and edits plans and products and can grant super admin.",
 };
 
 export const PLATFORM_ROLE_TONE: Record<PlatformRole, Tone> = {

@@ -9,3 +9,7 @@ npm-debug.log*
 .env
 next-env.d.ts
 /.idea
+
+# Playwright
+/test-results/
+/playwright-report/
