@@ -81,6 +81,15 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Same as the panel app: the synced public views pad by the device insets;
+   the editor preview sets --safe-top / --safe-bottom to simulate a phone. */
+.safe-area {
+  padding-top: max(0.75rem, var(--safe-top, env(safe-area-inset-top)));
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: max(1rem, var(--safe-bottom, env(safe-area-inset-bottom)));
+  padding-left: env(safe-area-inset-left);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
