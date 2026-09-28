@@ -61,7 +61,6 @@ export interface Plan {
   name: string;
   priceCents: number;
   interval: BillingInterval;
-  stripePriceId: string | null;
   features: PlanFeatures;
   _count?: { subscriptions: number };
 }
@@ -128,6 +127,8 @@ export interface Location {
   postalCode: string | null;
   country: string;
   googleReviewUrl: string | null;
+  /** Over the plan's location limit: live, but the customer cannot change it. */
+  readOnly: boolean;
 }
 
 export interface CustomerDetail {
@@ -137,6 +138,8 @@ export interface CustomerDetail {
   logo: string | null;
   billingEmail: string | null;
   brandColor: string;
+  /** Pages stay live and editable even when the plan does not include them. */
+  pagesOverride: boolean;
   salesRepId: string | null;
   deletedAt: string | null;
   createdAt: string;
@@ -328,6 +331,10 @@ export interface OrderCardDesign {
   showQr?: boolean;
   showGoogle?: boolean;
   showTapZone?: boolean;
+  showTapZoneText?: boolean;
+  tapZoneText?: string;
+  logoOnly?: boolean;
+  template?: string;
   logoScale?: number;
   reviewUrl?: string;
   fullName?: string;

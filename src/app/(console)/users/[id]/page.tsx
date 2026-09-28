@@ -158,9 +158,7 @@ function RoleCard({ user }: { user: AdminUserDetail }) {
   const [notice, setNotice] = useState<string | null>(null);
 
   const isSelf = staff.user.id === user.id;
-  const isSuper = staff.user.platformRole === "SUPER_ADMIN";
-  const lockedBySuper = user.platformRole === "SUPER_ADMIN" && !isSuper;
-  const canEdit = staff.capabilities.managesUsers && !isSelf && !lockedBySuper;
+  const canEdit = staff.capabilities.managesUsers && !isSelf;
 
   const save = useMutation({
     mutationFn: () =>
@@ -184,7 +182,7 @@ function RoleCard({ user }: { user: AdminUserDetail }) {
       <h2 className="display text-xl text-ink">Console role</h2>
       <div className="mt-4 space-y-2">
         {ROLES.map((r) => {
-          const disabled = !canEdit || (r === "SUPER_ADMIN" && !isSuper);
+          const disabled = !canEdit;
           return (
             <label
               key={r}
@@ -232,11 +230,7 @@ function RoleCard({ user }: { user: AdminUserDetail }) {
         </Button>
       ) : (
         <p className="mt-4 text-xs text-muted">
-          {isSelf
-            ? "You cannot change your own role."
-            : lockedBySuper
-              ? "Only a super admin can change this account."
-              : "Only admins can change roles."}
+          {isSelf ? "You cannot change your own role." : "Only super admins can change roles."}
         </p>
       )}
     </Card>

@@ -12,8 +12,8 @@ the API (`/api/v1/admin/*`); the console only mirrors it.
 |---------------|-------------------------------|------------------|-------|
 | `SALES`       | Own customers: view + manage, can create (assigned to self) | none | view |
 | `SUPPORT`     | All customers, read-only      | view             | view  |
-| `ADMIN`       | All customers: manage, assign sales reps, archive | view, change roles | edit |
-| `SUPER_ADMIN` | Like ADMIN, and can grant or revoke SUPER_ADMIN | | |
+| `ADMIN`       | All customers: manage, assign sales reps, archive | view | edit |
+| `SUPER_ADMIN` | Like ADMIN | view, change roles | edit |
 
 A customer (company) belongs to a sales rep via `Company.salesRepId`. Unassigned
 customers are only visible to SUPPORT and above.
@@ -43,8 +43,8 @@ picker to switch roles. Password for all: `taplino-dev`.
 
 | Email                   | Role        | Sees |
 |-------------------------|-------------|------|
-| `superadmin@taplino.ch` | Super admin | Everything, can grant super admin |
-| `admin@taplino.ch`      | Admin       | Every customer, user roles, plans |
+| `superadmin@taplino.ch` | Super admin | Everything, including user roles |
+| `admin@taplino.ch`      | Admin       | Every customer, plans |
 | `support@taplino.ch`    | Support     | Every customer, read-only |
 | `sales@taplino.ch`      | Sales       | Only Bistro Pro and Hotel Managed (its assigned customers) |
 | `dev@taplino.ch`        | Super admin | Default prefill; also a Starter customer in the app |
@@ -56,7 +56,7 @@ under `next dev`; production builds contain neither the emails nor the password.
 ### Granting staff roles
 
 Outside dev, the first staff account has to be granted from the backend, because
-only an ADMIN can hand out roles in the console:
+only a SUPER_ADMIN can hand out roles in the console:
 
 ```bash
 cd ../nfc-card-backend

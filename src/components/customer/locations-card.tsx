@@ -80,6 +80,14 @@ export function LocationsCard({ customer }: { customer: CustomerDetail }) {
               <p className="font-semibold text-ink">
                 {l.name}
                 {l.isDefault && <span className="ml-2 text-xs font-medium text-muted">Default</span>}
+                {l.readOnly && (
+                  <span
+                    className="ml-2 text-xs font-medium text-muted"
+                    title="Over the plan's location limit. Live, but the customer can't change it."
+                  >
+                    Read-only for customer
+                  </span>
+                )}
               </p>
               <p className="truncate text-sm text-muted">
                 {[l.address, [l.postalCode, l.city].filter(Boolean).join(" "), l.country]

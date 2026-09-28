@@ -436,6 +436,10 @@ function DesignSummary({ design: d, fileBase }: { design: OrderCardDesign; fileB
     ["Headline", d.headline],
     ["Category", d.category],
     ["Logo text", d.logoText],
+    [
+      "Tap marker text",
+      d.showTapZone === false && !d.logoOnly ? null : d.showTapZoneText === false ? "None" : d.tapZoneText,
+    ],
     ["Message", d.bodyText],
     ["List title", d.listTitle],
     [
@@ -469,6 +473,8 @@ function DesignSummary({ design: d, fileBase }: { design: OrderCardDesign; fileB
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
           <Spec label="Card type" value={d.cardType ? (CARD_TYPE_NAME[d.cardType] ?? d.cardType) : undefined} />
           {isBusiness && <Spec label="Finish" value={d.finish ? (FINISH_NAME[d.finish] ?? d.finish) : undefined} />}
+          {!isBusiness && <Spec label="Logo & marker only" value={d.logoOnly ? "Yes" : "No"} />}
+          {!isBusiness && <Spec label="Template" value={d.template} />}
           <Spec label="Layout" value={d.layout ? (LAYOUT_NAME[d.layout] ?? d.layout) : undefined} />
           <Spec label="Font" value={d.font ? (FONT_NAME[d.font] ?? d.font) : undefined} />
           <Spec label="Header edge" value={d.headerShape ? (SHAPE_NAME[d.headerShape] ?? d.headerShape) : undefined} />

@@ -183,6 +183,7 @@ function SubscriptionCard({ customer }: { customer: CustomerDetail }) {
       ) : (
         <p className="mt-4 text-sm text-muted">No plan assigned.</p>
       )}
+      <PagesAccess customer={customer} />
     </Card>
   );
 }
@@ -316,5 +317,51 @@ function SalesRepCard({ customer }: { customer: CustomerDetail }) {
         <p className="mt-4 text-sm text-muted">Unassigned</p>
       )}
     </Card>
+  );
+}
+
+/**
+ * Pages are live when the plan includes them. Otherwise they are kept but
+ * read-only and offline, unless staff turn on the override here.
+ */
+function PagesAccess({ customer }: { customer: CustomerDetail }) {
+  const invalidate = useCustomerInvalidation(customer.id);
+  const inPlan = Boolean(customer.subscription?.plan.features.createPages);
+  const toggle = useMutation({
+    mutationFn: (pagesOverride: boolean) =>
+      api.patch(`/admin/companies/${customer.id}`, { pagesOverride }),
+    onSuccess: invalidate,
+  });
+
+  return (
+    <div className="mt-5 border-t border-line pt-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-ink">Pages</p>
+          <p className="mt-0.5 text-sm text-muted">
+            {inPlan
+              ? "Included in the plan."
+              : customer.pagesOverride
+                ? "Not in the plan, but turned on by staff. Pages are live and editable."
+                : "Not in the plan. Pages are kept but offline, and their links open taplino.ch."}
+          </p>
+        </div>
+        {!inPlan && customer.canManage && (
+          <Button
+            variant="outline"
+            size="sm"
+            loading={toggle.isPending}
+            onClick={() => toggle.mutate(!customer.pagesOverride)}
+          >
+            {customer.pagesOverride ? "Turn off" : "Turn on"}
+          </Button>
+        )}
+      </div>
+      {toggle.error && (
+        <p className="mt-2 text-sm text-negative">
+          {errorMessage(toggle.error, "Could not change page access.")}
+        </p>
+      )}
+    </div>
   );
 }

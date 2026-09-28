@@ -102,7 +102,6 @@ function EditPlanModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(plan.name);
   const [price, setPrice] = useState((plan.priceCents / 100).toFixed(2));
-  const [stripePriceId, setStripePriceId] = useState(plan.stripePriceId ?? "");
   const [features, setFeatures] = useState<PlanFeatures>(plan.features);
   const [maxLocations, setMaxLocations] = useState(
     plan.features.maxLocations == null ? "" : String(plan.features.maxLocations),
@@ -116,7 +115,6 @@ function EditPlanModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
       api.patch(`/admin/plans/${plan.id}`, {
         name: name.trim(),
         priceCents,
-        stripePriceId: stripePriceId.trim() || null,
         features: {
           ...features,
           maxLocations: maxLocations.trim() === "" ? null : Math.max(1, Number(maxLocations)),
@@ -167,13 +165,6 @@ function EditPlanModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
             />
           </Field>
         </div>
-        <Field label="Stripe price ID" hint="Optional. Used for self-serve checkout.">
-          <Input
-            value={stripePriceId}
-            onChange={(e) => setStripePriceId(e.target.value)}
-            placeholder="price_..."
-          />
-        </Field>
         <div className="space-y-2">
           <span className="block text-sm font-semibold text-ink">Features</span>
           {FEATURE_LABELS.map((f) => (
