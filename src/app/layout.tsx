@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 
@@ -15,6 +16,15 @@ const body = Hanken_Grotesk({
   weight: ["400", "500", "600", "700"],
 });
 
+// Title font, self-hosted (Literata, OFL). Variable weight.
+const serif = localFont({
+  variable: "--font-serif",
+  src: "../fonts/literata-latin-wght.woff2",
+  weight: "200 900",
+  display: "swap",
+  fallback: ["Iowan Old Style", "Georgia", "serif"],
+});
+
 export const metadata: Metadata = {
   title: "Taplino Admin",
   description: "Manage Taplino customers, cards, plans and staff.",
@@ -25,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} h-full`}
+      className={`${display.variable} ${body.variable} ${serif.variable} h-full`}
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full">
